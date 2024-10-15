@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-const { server } = await import('./index.js')
+import { createHash, } from 'node:crypto'
+import { server } from './index.js'
 
 test('HTTP Server', async (t) => {
   const { listen } = await import('./index.js')
@@ -54,11 +55,28 @@ test('HTTP Server', async (t) => {
       assert.equal(await getBody(response.body), 'window.alert(\'Hello World\')\n')
     })
 
-    await t.test('favicon.ico ', async (t) => {
+    await t.test('favicon.ico', async (t) => {
       const response = await fetch('http://localhost:3000/favicon.ico')
 
       assert.equal(response.status, 200)
       assert.equal(await getBody(response.body), '')
+    })
+
+    await t.test('livereload.js', async (t) => {
+      const response = await fetch('http://localhost:3000/livereload.js')
+
+      assert.equal(response.status, 200)
+      assert.equal(response.headers.get('content-type'), 'application/javascript')
+
+      const hash = createHash('sha256')
+
+      for await (const chunk of response.body) {
+        const data = Buffer.from(chunk)
+        hash.update(data)
+      }
+
+      // compare response file with known good hash
+      assert.equal(hash.digest('hex'), 'e071a0325051d6bf19fc9c69c97cb7512e600a16e3f63fdd279cc39f72f9e488')
     })
 
     await t.test('path traversal', async (t) => {

@@ -14,14 +14,6 @@ function server () {
       return
     }
 
-    if (url === '/') {
-      req.url = '/index.html'
-    }
-
-    if (url === '/favicon.ico') {
-      return res.end()
-    }
-
     return handleUrl(req, res)
   })
 }
@@ -51,7 +43,17 @@ export {
 async function handleUrl (req, res) {
   const { url } = req
 
-  const filepath = Path.join(import.meta.dirname, url)
+  let filepath
+  if (url === '/') {
+    filepath = Path.join(import.meta.dirname, 'index.html')
+  } else if (url === '/favicon.ico') {
+    return res.end()
+  } else if (url === '/livereload.js') {
+    filepath = Path.join(import.meta.dirname, import.meta.resolve('livereload-js').split(import.meta.dirname)[1])
+  } else {
+    filepath = Path.join(import.meta.dirname, url)
+  }
+
   const extName = Path.extname(filepath)
   const type = mime.lookup(extName)
 

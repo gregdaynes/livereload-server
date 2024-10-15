@@ -7,6 +7,7 @@
     "test:watch": "node --test --watch"
   },
   "dependencies": {
+    "livereload-js": "^4.0.2",
     "mime-types": "^2.1.35",
     "ws": "^8.18.0"
   }
