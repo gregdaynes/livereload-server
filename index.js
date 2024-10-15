@@ -108,8 +108,10 @@ async function handleUrl (req, res) {
     if (type === 'text/html') {
       // html files get buffered, then modified with livereload script
       let html = ''
-      for await (const chunk of fd.readableWebStream()) {
-        html += Buffer.from(chunk).toString()
+
+      const stream = await fd.createReadStream()
+      for await (const chunk of stream) {
+        html += chunk.toString()
       }
 
       if (html.includes('</body>')) {
@@ -125,7 +127,6 @@ async function handleUrl (req, res) {
         res.write(Buffer.from(chunk))
       }
     }
-
     await fd.close()
   } catch (err) {
     res.writeHead(404)
