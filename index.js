@@ -5,17 +5,7 @@ import Path from 'node:path'
 import mime from 'mime-types'
 
 function server () {
-  return createServer(async (req, res) => {
-    const { url, headers } = req
-
-    if (url === '/' && headers.accept === 'text/plain') {
-      res.writeHead(200, { 'Content-Type': 'text/plain' })
-      res.end('Hello World')
-      return
-    }
-
-    return handleUrl(req, res)
-  })
+  return createServer((req, res) => handleUrl(req, res))
 }
 
 function listen (port = 3000) {
@@ -72,3 +62,4 @@ async function handleUrl (req, res) {
 
   res.end()
 }
+

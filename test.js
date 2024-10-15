@@ -19,18 +19,6 @@ test('HTTP Server', async (t) => {
   })
 
   await t.test('http server response', async (t) => {
-    await t.test('root without content accept header', async (t) => {
-      const response = await fetch('http://localhost:3000', {
-        headers: {
-          Accept: 'text/plain'
-        }
-      })
-
-      assert.equal(response.status, 200)
-      assert.equal(response.headers.get('content-type'), 'text/plain')
-      assert.equal(await getBody(response.body), 'Hello World')
-    })
-
     await t.test('root with content accept html header', async (t) => {
       const response = await fetch('http://localhost:3000')
 
