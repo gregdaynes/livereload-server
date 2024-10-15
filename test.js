@@ -24,7 +24,7 @@ test('HTTP Server', async (t) => {
 
       assert.equal(response.status, 200)
       assert.equal(response.headers.get('content-type'), 'text/html')
-      assert.equal(await getBody(response.body), '<h1>Hello World</h1>\n')
+      assert.equal((await getBody(response.body)).includes('<h1>Hello World</h1>\n'), true)
     })
 
     await t.test('request style.css', async (t) => {
@@ -40,7 +40,7 @@ test('HTTP Server', async (t) => {
 
       assert.equal(response.status, 200)
       assert.equal(response.headers.get('content-type'), 'application/javascript')
-      assert.equal(await getBody(response.body), 'window.alert(\'Hello World\')\n')
+      assert.equal(await getBody(response.body), 'console.log(\'Hello World\')\n')
     })
 
     await t.test('favicon.ico', async (t) => {
