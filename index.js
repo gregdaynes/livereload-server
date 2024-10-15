@@ -1,8 +1,9 @@
 import url from 'node:url'
+import { open } from 'node:fs/promises'
 import { createServer } from 'node:http'
 
 function server () {
-  return createServer((req, res) => {
+  return createServer(async (req, res) => {
     const { url, headers } = req
 
     if (url === '/' && headers.accept === 'text/plain') {
@@ -13,7 +14,15 @@ function server () {
 
     if (url === '/') {
       res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.write('<h1>Hello World</h1>')
+
+      const file = await open('./index.html')
+
+      for await (const chunk of file.readableWebStream()) {
+        res.write(Buffer.from(chunk))
+      }
+
+      await file.close()
+
       res.end()
     }
   })

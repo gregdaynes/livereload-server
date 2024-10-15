@@ -43,7 +43,7 @@ test('http server response', async (t) => {
 
     assert.equal(response.status, 200)
     assert.equal(response.headers.get('content-type'), 'text/html')
-    assert.equal(await getBody(response.body), '<h1>Hello World</h1>')
+    assert.equal(await getBody(response.body), '<h1>Hello World</h1>\n')
 
     await instance.close()
   })
