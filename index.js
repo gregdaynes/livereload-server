@@ -1,24 +1,52 @@
+import url from 'node:url'
 import { createServer } from 'node:http'
-// import { WebSocketServer } from 'ws'
 
 function server () {
   return createServer((req, res) => {
     const { url, headers } = req
 
-    if (url === '/' && !headers['accept']) {
+    if (url === '/' && headers.accept === 'text/plain') {
       res.writeHead(200, { 'Content-Type': 'text/plain' })
       res.end('Hello World')
+      return
     }
 
-    if (url === '/' && headers['accept'] === 'text/html') {
+    if (url === '/') {
       res.writeHead(200, { 'Content-Type': 'text/html' })
-      res.end('<h1>Hello World</h1>')
+      res.write('<h1>Hello World</h1>')
+      res.end()
     }
   })
 }
 
 function listen (port = 3000) {
-  return server().listen(port)
+  const instance = server()
+  instance.listen(port)
+
+  return {
+    listening: instance.listening,
+    close () {
+      const { promise, resolve, reject } = Promise.withResolvers()
+
+      try {
+        instance.close(() => {
+          resolve()
+        })
+
+        return promise
+      } catch (err) {
+        reject(err)
+      }
+    }
+  }
+}
+
+if (import.meta.url.startsWith('file:')) { // (A)
+  const modulePath = url.fileURLToPath(import.meta.url)
+
+  if (process.argv[1] === modulePath) { // (B)
+    listen()
+  }
 }
 
 export default server
