@@ -30,22 +30,7 @@ function listen (port = 3000) {
   const instance = server()
   instance.listen(port)
 
-  return {
-    listening: instance.listening,
-    close () {
-      const { promise, resolve, reject } = Promise.withResolvers()
-
-      try {
-        instance.close(() => {
-          resolve()
-        })
-
-        return promise
-      } catch (err) {
-        reject(err)
-      }
-    }
-  }
+  return instance
 }
 
 if (import.meta.url.startsWith('file:')) { // (A)

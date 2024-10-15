@@ -14,7 +14,7 @@ test('http server listening', async (t) => {
 
   assert(instance.listening)
 
-  await instance.close()
+  instance.close()
 })
 
 test('http server response', async (t) => {
@@ -32,7 +32,7 @@ test('http server response', async (t) => {
     assert.equal(response.headers.get('content-type'), 'text/plain')
     assert.equal(await getBody(response.body), 'Hello World')
 
-    await instance.close()
+    instance.close()
   })
 
   await t.test('root with content accept html header', async (t) => {
@@ -45,7 +45,7 @@ test('http server response', async (t) => {
     assert.equal(response.headers.get('content-type'), 'text/html')
     assert.equal(await getBody(response.body), '<h1>Hello World</h1>\n')
 
-    await instance.close()
+    instance.close()
   })
 
   await t.test('request style.css', async (t) => {
@@ -58,7 +58,7 @@ test('http server response', async (t) => {
     assert.equal(response.headers.get('content-type'), 'text/css')
     assert.equal(await getBody(response.body), 'body {\n  color: red;\n}\n')
 
-    await instance.close()
+    instance.close()
   })
 
   await t.test('request script.js', async (t) => {
@@ -71,7 +71,7 @@ test('http server response', async (t) => {
     assert.equal(response.headers.get('content-type'), 'application/javascript')
     assert.equal(await getBody(response.body), 'window.alert(\'Hello World\')\n')
 
-    await instance.close()
+    instance.close()
   })
 
   await t.test('favicon.ico ', async (t) => {
@@ -83,7 +83,7 @@ test('http server response', async (t) => {
     assert.equal(response.status, 200)
     assert.equal(await getBody(response.body), '')
 
-    await instance.close()
+    instance.close()
   })
 
   await t.test('path traversal', async (t) => {
@@ -94,7 +94,7 @@ test('http server response', async (t) => {
 
     assert.equal(response.status, 404)
 
-    await instance.close()
+    instance.close()
   })
 })
 
