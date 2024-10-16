@@ -41,12 +41,12 @@ function server () {
  *  const instance = await listen(3000)
  *  instance.close()
  */
-function listen (port = 3000) {
+function listen (port = 3000, watchFn = watch) {
   const instance = server()
   const wss = createWebSocketServer(instance)
   const fileChanged = sendLiveReloadCommand.bind(null, wss)
 
-  const watcher = watch(import.meta.dirname, (eventType, filename) => {
+  const watcher = watchFn(import.meta.dirname, (eventType, filename) => {
     if (eventType === 'change') {
       // TODO replace / + filename with something more robust.
       fileChanged('reload', '/' + filename)
@@ -59,6 +59,7 @@ function listen (port = 3000) {
     listening: instance.listening,
     close () {
       wss.close()
+
       watcher.close()
       instance.close()
     }

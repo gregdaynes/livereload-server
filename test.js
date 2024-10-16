@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { createHash, } from 'node:crypto'
 import { server } from './index.js'
 import { writeFile } from 'node:fs/promises'
+import { setTimeout as sleep } from 'node:timers/promises'
 
 test('HTTP Server', async (t) => {
   const { listen } = await import('./index.js')
@@ -100,7 +101,21 @@ test('HTTP Server', async (t) => {
 
 test('WS Server', async (t) => {
   const { listen } = await import('./index.js')
-  const instance = await listen(4000)
+
+  // CI can't test file creation, so we have to mock it
+  let watchFn
+  let triggerChangeEvent
+  if (process.env.CI) {
+    watchFn = (filename, eventHandler) => {
+      triggerChangeEvent = () => eventHandler('change', 'test.file')
+
+      return {
+        close () {}
+      }
+    }
+  }
+
+  const instance = await listen(4000, watchFn)
 
   t.after(() => instance.close())
 
@@ -143,7 +158,7 @@ test('WS Server', async (t) => {
     const controller = new AbortController()
     const signal = controller.signal
 
-    const { promise, resolve } = Promise.withResolvers()
+    const { promise, resolve, reject } = Promise.withResolvers()
 
     const socket = new WebSocket('ws://localhost:4000')
 
@@ -160,7 +175,19 @@ test('WS Server', async (t) => {
       resolve()
     }, { signal })
 
-    await writeFile('./test.file', 'please delete me')
+    try {
+      if (process.env.CI) {
+        await sleep(10)
+        triggerChangeEvent()
+      } else {
+        await writeFile('./test.file', 'please delete me')
+      }
+    } catch (err) {
+      console.error(err)
+      socket.close()
+      controller.abort()
+      reject(err)
+    }
 
     return promise
   })
