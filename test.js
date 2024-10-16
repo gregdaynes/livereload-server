@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash, } from 'node:crypto'
 import { server } from './index.js'
+import { writeFile } from 'node:fs/promises'
 
 test('HTTP Server', async (t) => {
   const { listen } = await import('./index.js')
@@ -117,6 +118,32 @@ test('WS Server', async (t) => {
       controller.abort()
       resolve()
     }, { signal })
+
+    return promise
+  })
+
+  await t.test('File watcher triggers sendLiveReloadCommand', async (t) => {
+    const controller = new AbortController()
+    const signal = controller.signal
+
+    const { promise, resolve } = Promise.withResolvers()
+
+    const socket = new WebSocket('ws://localhost:4000')
+
+    socket.addEventListener('message', async (event) => {
+      const data = JSON.parse(event.data)
+
+      assert.equal(data.command, 'reload')
+      assert.equal(data.path, '/test.file')
+      assert.equal(data.liveCSS, true)
+
+      socket.close()
+      controller.abort()
+
+      resolve()
+    }, { signal })
+
+    await writeFile('./test.file', 'please delete me')
 
     return promise
   })
