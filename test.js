@@ -73,6 +73,23 @@ test('HTTP Server', async (t) => {
 
       assert.equal(response.status, 404)
     })
+
+    await t.test('test.html with content accept html header', async (t) => {
+      const response = await fetch('http://localhost:3000/test.html')
+
+      assert.equal(response.status, 200)
+      assert.equal(response.headers.get('content-type'), 'text/html')
+      assert.equal((await getBody(response.body)).includes('<h1>Hello World</h1>\n'), true)
+    })
+
+    await t.test('test2.html with content accept html header', async (t) => {
+      const response = await fetch('http://localhost:3000/test2.html')
+
+      assert.equal(response.status, 200)
+      assert.equal(response.headers.get('content-type'), 'text/html')
+
+      assert.equal((await getBody(response.body)).includes(':3000/livereload.js'), true)
+    })
   })
 
   async function getBody (body) {
