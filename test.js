@@ -79,3 +79,45 @@ test('HTTP Server', async (t) => {
     return Buffer.from(bodyBuffer).toString()
   }
 })
+
+test('WS Server', async (t) => {
+  const { listen } = await import('./index.js')
+  const instance = await listen(4000)
+
+  t.after(() => instance.close())
+
+  await t.test('ws server response', async (t) => {
+    const controller = new AbortController()
+    const signal = controller.signal
+
+    const { promise, resolve } = Promise.withResolvers()
+
+    const socket = new WebSocket('ws://localhost:4000')
+
+    socket.addEventListener('open', (event) => {
+      socket.send(JSON.stringify({ command: 'hello' }))
+    }, { signal })
+
+    socket.addEventListener('message', (event) => {
+      const data = JSON.parse(event.data)
+
+      assert.equal(data.command, 'hello')
+      assert.ok(data.protocols.filter((entry) => {
+        const versions = [
+          'http://livereload.com/protocols/official-7',
+          'http://livereload.com/protocols/official-8',
+          'http://livereload.com/protocols/official-9',
+          'http://livereload.com/protocols/2.x-origin-version-negotiation',
+          'http://livereload.com/protocols/2.x-remote-control'
+        ]
+
+        return versions.includes(entry)
+      }))
+      socket.close()
+      controller.abort()
+      resolve()
+    }, { signal })
+
+    return promise
+  })
+})
